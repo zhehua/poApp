@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: poApp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: poApp
+  template:
+    metadata:
+      labels:
+        app: poApp
+    spec:
+      terminationGracePeriodSeconds: 0
+      containers:
+      - name: api
+        image: okteto/poApp:java-maven
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: poApp
+  annotations:
+    dev.okteto.com/auto-ingress: "true"
+  labels:
+    app: poApp
+spec:
+  type: ClusterIP
+  ports:
+    - name: poApp
+      port: 8080
+  selector:
+    app: poApp
