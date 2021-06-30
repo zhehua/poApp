@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hello-world
+  name: poxy-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: hello-world
+      app: poxy-app
   template:
     metadata:
       labels:
-        app: hello-world
+        app: poxy-app
     spec:
       terminationGracePeriodSeconds: 0
       containers:
         - name: api
-          image: okteto/hello-world:java-maven
+          image: okteto/poxy-app:java-maven
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
@@ -25,15 +25,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: hello-world
+  name: poxy-app
   annotations:
     dev.okteto.com/auto-ingress: "true"
   labels:
-    app: hello-world
+    app: poxy-app
 spec:
   type: ClusterIP
   ports:
-    - name: hello-world
+    - name: poxy-app
       port: 8080
   selector:
-    app: hello-world
+    app: poxy-app
