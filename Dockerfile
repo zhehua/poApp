@@ -1,6 +1,6 @@
 FROM openjdk:8-jdk-alpine
-COPY poApp.jar /app/poApp.jar
-ENTRYPOINT ["java","-jar","/app/poApp.jar"]
+COPY /target/poapp.jar /app/poapp.jar
+ENTRYPOINT ["java","-jar","/app/poapp.jar"]
 #FROM maven:3.6.0-jdk-8-alpine AS MAVEN_BUILD
 #RUN mvn package
 ## 使用java环境
