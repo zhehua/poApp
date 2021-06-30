@@ -11,6 +11,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <docker.registry>beeman</docker.registry>
     </properties>
     <dependencies>
         <dependency>
@@ -21,6 +22,7 @@
 
     </dependencies>
     <build>
+        <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -55,6 +57,91 @@
                     </filters>
                 </configuration>
             </plugin>
+
+
+
+            <!-- =========================================================================
+            == Copy resources into target folder                                      ==
+            ========================================================================= -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <!-- resources to build docker image -->
+                    <execution>
+                        <id>generate-docker-build</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/docker-build</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/src/docker</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- =========================================================================
+              == Execute commands                                                       ==
+              ========================================================================= -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <!-- Build docker image -->
+                    <execution>
+                        <id>exec-docker-build</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>docker</executable>
+                            <commandlineArgs>build --no-cache --tag ${docker.registry}/${project.artifactId}:${project.version} -f ${project.build.directory}/docker-build/Dockerfile ${project.build.directory}</commandlineArgs>
+                        </configuration>
+                    </execution>
+                    <!-- Deploy app to kubernetes with yaml -->
+                    <execution>
+                        <id>exec-kubectl-deploy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>kubectl</executable>
+                            <commandlineArgs>apply -f ${project.basedir}/src/deployments/helloworld-app.yaml</commandlineArgs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- fix error java.lang.ClassNotFoundException: org.apache.maven.doxia.siterenderer.DocumentContent -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.8.2</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>3.0.0</version>
+            </plugin>
+
+
+
+
+
+
+
+
+
+
 
         </plugins>
     </build>

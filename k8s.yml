@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: poxy-app
+  name: @project.artifactId@
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: poxy-app
+      app: @project.artifactId@
   template:
     metadata:
       labels:
-        app: poxy-app
+        app: @project.artifactId@
     spec:
       terminationGracePeriodSeconds: 0
       containers:
         - name: api
-          image: okteto/poxy-app:java-maven
+          image: @docker.registry@/@project.artifactId@:@project.version@
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
@@ -25,15 +25,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: poxy-app
+  name: @project.artifactId@
   annotations:
     dev.okteto.com/auto-ingress: "true"
   labels:
-    app: poxy-app
+    app: @project.artifactId@
 spec:
   type: ClusterIP
   ports:
-    - name: poxy-app
+    - name: @project.artifactId@
       port: 8080
   selector:
-    app: poxy-app
+    app: @project.artifactId@
